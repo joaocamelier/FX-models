@@ -1087,6 +1087,11 @@ body { padding-top: 47px; }
         <span class="item-num">11.1</span>
       </a>
       
+      <a class="sidebar-link" href="#sub-notes-index">
+        <span>How the Average Index is built</span>
+        <span class="item-num">11.2</span>
+      </a>
+      
     </div>
     
   </nav>
@@ -1187,7 +1192,7 @@ body { padding-top: 47px; }
   </h3>
   
   
-  <p class="pane-note">The <b>Average Index</b> of the Compass FX Positioning Indicators screen: the mean of CFTC, DSI, Citi (retail, leveraged, real money), State Street and BNP, each one a 1-year z-score scaled to &minus;100/+100. Above zero the market is long the currency. The three differences are the series behind the AUD/NZD, EUR/AUD and EUR/GBP signals.</p>
+  <p class="pane-note">The <b>Average Index</b> of the Compass FX Positioning Indicators screen: the simple mean of seven sources (CFTC, DSI, Citi retail, leveraged and real money, State Street and BNP), each one a rolling 1-year z-score divided by its largest absolute value in that year and scaled to &minus;100/+100. The full recipe is in <b>Notes</b>. Above zero the market is long the currency. The three differences are the series behind the AUD/NZD, EUR/AUD and EUR/GBP signals.</p>
   
     
     
@@ -6752,11 +6757,10 @@ their same-day correlation is understated.</p>
 
 <h4>Positioning index</h4>
 <p>The Average Index of the Compass FX Positioning Indicators screen, with history from
-26/09/2017 and a new collection every business day. It is the mean of seven sources, and it only
-exists for a date once the slowest source has published. On 25/11/2026 the last date was 20/11, three business days back. The collector records the day each date first appears, and this paragraph will show the measured delay once there are enough dates. Each source is a
-1-year z-score divided by the largest absolute value of the period, so old values can be
-rescaled when a new extreme appears; the collector logs every revision, and a signal
-seen live is frozen and kept whatever the next vintage says.</p>
+26/09/2017 and a new collection every business day. It is the simple mean of seven normalized sources (next subsection), and
+it only exists for a date once the slowest source has published. On 25/11/2026 the last date was 20/11, three business days back. The collector records the day each date first appears, and this paragraph will show the measured delay once there are enough dates. The collector
+logs every revision of a past value, and a signal seen live is frozen and kept whatever
+the next vintage says.</p>
 
 <h4>Signals</h4>
 <p>A signal fires on the day the index crosses a threshold away from zero: above +k is
@@ -6776,6 +6780,60 @@ for the past return (HAC t of &minus;2.7, at the limit after correcting for eigh
 pairs); NZD/USD and AUD/NZD lost significance with the control and the other five
 showed nothing. Read the hit ratios here with that in mind.</p>
 
+  
+  
+</section><!-- <ROOT>/fairvalue/report/_subsecao.html -->
+<section class="sub subsection" id="sub-notes-index">
+  
+  
+  <h3 class="subsection-title">
+    <span class="num">11.2</span>
+    <span class="text">How the Average Index is built</span>
+  </h3>
+  
+  
+  
+<p>The positioning series in this report is the <b>Average Index</b> of the JGP Compass
+screen <i>FX Positioning Indicators</i>. It is built in three steps.</p>
+<p><b>1. Seven sources per currency.</b> The table below lists them, with the name
+Compass gives each one.</p>
+<p><b>2. Each source is put on the same scale.</b> In the words of the Compass screen,
+to allow comparison across sources it applies a normalization similar to Citi's: it
+computes the <b>z-score over a rolling one-year window</b> and <b>divides that z-score by
+its largest absolute value observed in the same period</b>. The result runs from
+&minus;100 to +100: +100 means the most stretched long of the last year for that
+source, &minus;100 the most stretched short.</p>
+<p><b>3. The Average Index is the simple mean of the seven normalized sources on the
+same day</b>, with equal weights. It exists only on days when all seven have a value,
+which is why it stops at the date of the slowest source.</p>
+<p><b>What we checked ourselves</b> (API responses of 25/11/2026, six currencies,
+2,356 days each): the mean of the seven sources reproduces the Average Index on every
+day, with a difference of 0.00, and no day of the average has a source missing. Each
+source touches exactly &plusmn;100 many times in its history (CFTC 399 times, BNP 28
+times in AUD), which is what a divisor taken from the trailing year produces: the
+scale does not use future data. Above zero the market is long the currency; this
+report reads that as a contrarian sell.</p>
+<p>For a pair the series is: the currency itself against the dollar (AUD/USD uses AUD),
+the difference base minus quote in a cross (AUD/NZD uses AUD &minus; NZD), and the JPY
+index with the sign flipped in USD/JPY.</p>
+
+  
+    
+    
+<div class="grid-2 full-width">
+  
+  <figure class="figure reveal" id="fig-idxsrc_table">
+    <div class="figure-frame">
+      <table class="htab sigtab"><thead><tr><th>Source</th><th>Indicator (name in Compass)</th><th>Unit in Compass</th></tr></thead><tbody><tr><td><b>CFTC</b></td><td style='text-align:left;white-space:normal'>Commitments of Traders (COT), futures and options combined, legacy report: non-commercial traders' net position, number of contracts</td><td>Z-score</td></tr><tr><td><b>DSI</b></td><td style='text-align:left;white-space:normal'>Daily Sentiment Index, FX sentiment indicator of the currency</td><td>Z-score</td></tr><tr><td><b>Citi</b></td><td style='text-align:left;white-space:normal'>Citi Positioning Indicator, retail</td><td>Index</td></tr><tr><td><b>Citi</b></td><td style='text-align:left;white-space:normal'>Citi Positioning Indicator, leveraged</td><td>Index</td></tr><tr><td><b>Citi</b></td><td style='text-align:left;white-space:normal'>Citi Positioning Indicator, real money</td><td>Index</td></tr><tr><td><b>State Street</b></td><td style='text-align:left;white-space:normal'>Foreign Exchange Holdings Indicator: excess, weighted by assets under management, all (domestic + foreign)</td><td>Z-score</td></tr><tr><td><b>BNP Paribas</b></td><td style='text-align:left;white-space:normal'>BNP Paribas FX Positioning Tracker</td><td>Z-score</td></tr></tbody></table>
+      
+      
+    </div>
+    <figcaption class="figure-caption">
+      <span class="ref">11.2.1</span>How the Average Index is built &mdash; the seven sources of the Average Index
+    </figcaption>
+  </figure>
+  
+</div>
   
   
 </section>
